@@ -1,0 +1,16 @@
+{
+    "name": "quietcss",
+    "version": "1.0.0",
+    "description": "A lightweight CSS preprocessor, inspired by JSX in comfort and setup",
+    "dependencies": {
+        "cssbeautify": "^0.3.1"
+    },
+    "author": "Darud Lingilen",
+    "license": "MIT",
+    "keywords": [
+        "css",
+        "style",
+        "preprocessor"
+    ],
+    "main": "./index.js"
+}
