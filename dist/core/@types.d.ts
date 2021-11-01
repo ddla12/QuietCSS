@@ -12,4 +12,11 @@ export interface QuietCSSArray {
 export interface QuietCSSString {
     apply(style: StyleMap): string;
 }
+export declare type QuietCSSSelector = QuietCSSArray | QuietCSSString;
+export interface QuietCSSStyleInstance {
+    style: StyleMap;
+    add(properties: QuietCSSTemplate, variables?: CSSVariables): void;
+    edit(variable: string, value: any): void;
+    remove(...properties: string[]): void;
+}
 export {};

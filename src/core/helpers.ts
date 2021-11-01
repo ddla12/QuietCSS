@@ -1,10 +1,5 @@
 import { StyleMap } from "./@types";
 
-const cssbeautify = require("cssbeautify"),
-    options = {
-        autosemicolon: true
-    };
-
 /**
  * Convert a capitalize property to dash case, for example 'paddingTop' to 'padding-top'
  * @param string 
@@ -42,7 +37,7 @@ export const cssProperty = ([prop, value]: string[]) => `${toDashCase(prop)}: ${
  * @param map 
  * @returns A CSS block (rule)
  */
-export const toCSSBlock = (map: StyleMap) => cssbeautify(map.map(cssProperty).join("\n").trimEnd, options);
+export const toCSSBlock = (map: StyleMap) => map.map(cssProperty).join("\n").trimEnd();
 
 /**
  * Minify a CSS input

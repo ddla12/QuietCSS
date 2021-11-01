@@ -14,6 +14,23 @@ const ERROR_MESSAGES = {
         }
     }
 };
+const QuietCSSStyle = (style) => ({
+    style,
+    add(properties, variables) {
+        this.style = [...this.style, ...makeStyle(properties, variables).style];
+    },
+    edit(variable, value) {
+        const varIndex = this.style.findIndex(([prop]) => prop === variable);
+        if (varIndex === -1) {
+            console.warn("No variable with that name was found");
+            return;
+        }
+        this.style[varIndex][1] = value;
+    },
+    remove(...properties) {
+        this.style = this.style.filter(([prop]) => !properties.includes(prop));
+    }
+});
 const QuietCSS = (selector) => ({
     ...(typeof selector === "string")
         ? ({
@@ -45,10 +62,10 @@ function makeSelector(selector) {
 }
 exports.makeSelector = makeSelector;
 function makeStyle(properties, variables) {
-    return [
+    return QuietCSSStyle([
         ...(variables ? Object.entries(variables).map(([variable, value]) => [`--${(0, helpers_js_1.toDashCase)(variable)}`, value]) : []),
         ...Object.entries(properties)
-    ].map(([prop, value]) => [(0, helpers_js_1.toDashCase)(prop), value]);
+    ].map(([prop, value]) => [(0, helpers_js_1.toDashCase)(prop), value]));
 }
 exports.makeStyle = makeStyle;
 function makeNestedSelector(parent, selectors) {
@@ -67,7 +84,7 @@ function makeRules(selectors, styles) {
 exports.makeRules = makeRules;
 function makeRule(selector, style) {
     selector = (typeof selector === "string" ? selector : selector.join(", ")).trim();
-    return `${selector} {\n${(0, helpers_js_1.toCSSBlock)((style instanceof Array) ? style : makeStyle(style))}\n}\n`;
+    return `${selector} {\n${(0, helpers_js_1.toCSSBlock)((style instanceof Array) ? style : makeStyle(style).style)}\n}\n`;
 }
 exports.makeRule = makeRule;
 function makeCSS(template, ...interpolations) {
@@ -84,7 +101,9 @@ exports.importStyles = importStyles;
 function makeCSSOutput(path, value, minify = false) {
     ERROR_MESSAGES.fileExtension(path);
     console.time("Output duration");
-    value = cssbeautify((minify) ? (0, helpers_js_1.minifyOutput)(value) : value, options);
+    value = (minify)
+        ? cssbeautify(value, options)
+        : (0, helpers_js_1.minifyOutput)(value);
     if (!minify)
         console.warn("\nRemember to set minify true if you are ready to production!\n");
     (0, fs_1.writeFile)(path, value, (e) => {

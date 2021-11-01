@@ -1,4 +1,5 @@
-import { QuietCSSTemplate, StyleMap, Selector, QuietCSSArray, QuietCSSString, CSSVariables, CSSRuleStyles } from "./@types.js";
+
+import { QuietCSSTemplate, StyleMap, Selector, QuietCSSArray, QuietCSSString, CSSVariables, CSSRuleStyles, QuietCSSStyleInstance, QuietCSSSelector } from "./@types.js";
 import { minifyOutput, toDashCase, toCSSBlock, hasEmptyStrings } from "./helpers.js";
 import { readFileSync, writeFile } from "fs";
 
@@ -17,11 +18,53 @@ const ERROR_MESSAGES = {
 };
 
 /**
+ * Creates a CSS map based on a literal
+ * @param style 
+ * @returns A customizable and reusable CSS map
+ */
+const QuietCSSStyle = (style: StyleMap): QuietCSSStyleInstance => ({
+    /**
+     * The style map
+     */
+    style,
+    /**
+     * Append new properties and variables to the current style map
+     * @param properties 
+     * @param variables 
+     */
+    add(properties: QuietCSSTemplate, variables?: CSSVariables): void {
+        this.style = [...this.style, ...makeStyle(properties, variables).style];
+    },
+    /**
+     * Edit a property or a variable
+     * @param variable 
+     * @param value 
+     */
+    edit(variable: string, value: any): void {
+        const varIndex = this.style.findIndex(([prop]) => prop === variable);
+
+        if(varIndex === -1) {
+            console.warn("No variable with that name was found");
+            return;
+        }
+
+        this.style[varIndex][1] = value;
+    },
+    /**
+     * Removes element for the style map
+     * @param properties 
+     */
+    remove(...properties: string[]): void {
+        this.style = this.style.filter(([prop]) => !properties.includes(prop));
+    }
+});
+
+/**
  * An object that allows you to control and generate CSS rules 
  * @param selector 
  * @returns A proper control to the selectors
  */
-const QuietCSS = (selector: Selector[]|Selector): QuietCSSArray|QuietCSSString => ({
+const QuietCSS = (selector: Selector[]|Selector): QuietCSSSelector => ({
     ...(typeof selector === "string") 
         ? ({
             apply(style: StyleMap) {
@@ -65,11 +108,11 @@ export function makeSelector(selector: Selector|Selector[]) {
  * @param properties 
  * @returns A valid style map
  */
-export function makeStyle(properties: QuietCSSTemplate, variables?: CSSVariables): StyleMap {
-    return [
+export function makeStyle(properties: QuietCSSTemplate, variables?: CSSVariables) {
+    return QuietCSSStyle([
         ...(variables ? Object.entries(variables).map(([variable, value]) => [`--${toDashCase(variable)}`,value]) : []),
         ...Object.entries(properties)
-    ].map(([prop, value]) => [toDashCase(prop), value as string]);
+    ].map(([prop, value]) => [toDashCase(prop), value as string]));
 }
 
 /**
@@ -114,7 +157,7 @@ export function makeRules(selectors: (Selector|Selector[])[], styles: CSSRuleSty
 export function makeRule(selector: Selector|Selector[], style: QuietCSSTemplate|StyleMap): string {
     selector = (typeof selector === "string" ? selector : selector.join(", ")).trim();
 
-    return `${selector} {\n${toCSSBlock((style instanceof Array) ? style : makeStyle(style))}\n}\n`;
+    return `${selector} {\n${toCSSBlock((style instanceof Array) ? style : makeStyle(style).style)}\n}\n`;
 }
 
 /**
@@ -146,7 +189,9 @@ export function makeCSSOutput(path: string, value: string, minify: boolean = fal
 
     console.time("Output duration");
 
-    value = cssbeautify((minify) ? minifyOutput(value) : value, options);
+    value = (minify)
+        ? cssbeautify(value, options)
+        : minifyOutput(value);
 
     if(!minify) console.warn("\nRemember to set minify true if you are ready to production!\n");
 

@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "tsc",
-    "test": "jest -c ./jest.config.js"
+    "test": "jest -c ./jest.config.js",
+    "default:style": "node ./style/index.js"
   },
   "devDependencies": {
     "cssbeautify": "^0.3.1",

@@ -1,7 +1,7 @@
-import { QuietCSSTemplate, StyleMap, Selector, QuietCSSArray, QuietCSSString, CSSVariables, CSSRuleStyles } from "./@types.js";
-export declare function makeSelector(selector: Selector | Selector[]): QuietCSSArray | QuietCSSString;
-export declare function makeStyle(properties: QuietCSSTemplate, variables?: CSSVariables): StyleMap;
-export declare function makeNestedSelector(parent: Selector, selectors: string[]): QuietCSSArray | QuietCSSString;
+import { QuietCSSTemplate, StyleMap, Selector, CSSVariables, CSSRuleStyles, QuietCSSStyleInstance, QuietCSSSelector } from "./@types.js";
+export declare function makeSelector(selector: Selector | Selector[]): QuietCSSSelector;
+export declare function makeStyle(properties: QuietCSSTemplate, variables?: CSSVariables): QuietCSSStyleInstance;
+export declare function makeNestedSelector(parent: Selector, selectors: string[]): QuietCSSSelector;
 export declare function makeRulesByNesting(parent: Selector, nested: string[], styles: CSSRuleStyles): string;
 export declare function makeRules(selectors: (Selector | Selector[])[], styles: CSSRuleStyles): string;
 export declare function makeRule(selector: Selector | Selector[], style: QuietCSSTemplate | StyleMap): string;
